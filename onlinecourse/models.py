@@ -136,7 +136,17 @@ class Choice(models.Model):
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
-#class Submission(models.Model):
-#    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-#    choices = models.ManyToManyField(Choice)
+class Submission(models.Model):
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(Choice)
+
+    def get_score(self):
+        # Get all the correct choices for the enrollment's course
+        correct_choices = Choice.objects.filter(question__course=self.enrollment.course, is_correct=True)
+
+        # Get the selected choices for the submission
+        selected_choices = self.choices.filter(is_correct=True)
+
+        # Check if all correct choices were selected
+        return correct_choices.count() == selected_choices.count() and correct_choices.count() > 0
 #    Other fields and methods you would like to design
